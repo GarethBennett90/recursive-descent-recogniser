@@ -11,11 +11,11 @@ import java.io.PrintStream;
  * @date 28/02/2017
  * RecursiveDescentRecogniser
  */
-public class SyntaxAnalyser extends AbstractSyntaxAnalyser{
+public class SyntaxAnalyser extends AbstractSyntaxAnalyser {
 
-   public SyntaxAnalyser(String filename) {
+    public SyntaxAnalyser(String filename) {
 
-   }
+    }
 
     @Override
     public void _statementPart_() throws IOException, CompilationException {
@@ -29,6 +29,6 @@ public class SyntaxAnalyser extends AbstractSyntaxAnalyser{
 
     public void parse(PrintStream output) {
 
-   }
+    }
 
 }
