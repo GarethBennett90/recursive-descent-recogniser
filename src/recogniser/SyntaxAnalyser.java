@@ -2,9 +2,9 @@ package recogniser;
 
 import lib.AbstractSyntaxAnalyser;
 import lib.CompilationException;
+import lib.LexicalAnalyser;
 
 import java.io.IOException;
-import java.io.PrintStream;
 
 /**
  * @author JamesDavies
@@ -14,6 +14,12 @@ import java.io.PrintStream;
 public class SyntaxAnalyser extends AbstractSyntaxAnalyser {
 
     public SyntaxAnalyser(String filename) {
+        try{
+            this.lex = new LexicalAnalyser(filename);
+            this.nextToken = lex.getNextToken();
+        } catch(Exception e) {
+            System.err.println("Failed to load lexical analyser.");
+        }
 
     }
 
@@ -24,10 +30,6 @@ public class SyntaxAnalyser extends AbstractSyntaxAnalyser {
 
     @Override
     public void acceptTerminal(int symbol) throws IOException, CompilationException {
-
-    }
-
-    public void parse(PrintStream output) {
 
     }
 

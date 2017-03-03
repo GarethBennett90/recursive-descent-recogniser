@@ -15,10 +15,6 @@ public class Generate extends AbstractGenerate{
         // Constructor
     }
 
-    public void reportSuccess() {
-
-    }
-
     @Override
     public void reportError(Token token, String explanatoryMessage) throws CompilationException {
 

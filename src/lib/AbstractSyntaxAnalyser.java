@@ -13,11 +13,11 @@ import java.io.*;
 
 public abstract class AbstractSyntaxAnalyser {
     /** The lexical analyser to process input using. */
-    LexicalAnalyser lex;
+    protected LexicalAnalyser lex;
     /** A cache of the token to be processed next. */
-    Token nextToken;
+    protected Token nextToken;
     /** A code generator, descendant of AbstractGenerate. */
-    Generate myGenerate = null;
+    protected Generate myGenerate = null;
 
     /** Begin processing the first (top level) token.*/
     public abstract void _statementPart_() throws IOException, CompilationException;
