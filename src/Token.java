@@ -1,4 +1,3 @@
-package lib;
 /**
  *
  * Represents a lexical token for 254 exercise. 

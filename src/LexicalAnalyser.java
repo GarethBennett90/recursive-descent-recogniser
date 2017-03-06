@@ -1,4 +1,3 @@
-package lib;
 /**
  * lexical analyser for 254 exercise.
  * <p>

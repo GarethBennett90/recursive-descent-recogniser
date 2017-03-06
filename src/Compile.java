@@ -1,4 +1,3 @@
-package lib;
 /**
  * SyntaxAnalyser Driver program for 254 exercise.
  * <p>
@@ -7,7 +6,6 @@ package lib;
  * @Author: Roger Garside, John Mariani, John Vidler
  **/
 
-import recogniser.SyntaxAnalyser;
 
 import java.io.*;
 

@@ -1,5 +1,3 @@
-package lib;
-
 /**
  * Abstract Generate methods for 254 exercise.  This class provides an interface for arbitrary code generators to accept syntax from the rest of the system.
  * <p>

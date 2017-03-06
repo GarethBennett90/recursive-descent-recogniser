@@ -1,4 +1,3 @@
-package lib;
 /**
  *
  * compilation exception analyser for 254 exercise.

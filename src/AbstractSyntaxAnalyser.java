@@ -1,4 +1,3 @@
-package lib;
 /**
  * (Abstract) Syntax analyser for exercise course 254.
  * <p>
@@ -7,17 +6,15 @@ package lib;
  * @Author: Roger Garside,  John Mariani, John Vidler
  **/
 
-import recogniser.Generate;
-
 import java.io.*;
 
 public abstract class AbstractSyntaxAnalyser {
     /** The lexical analyser to process input using. */
-    protected LexicalAnalyser lex;
+    LexicalAnalyser lex;
     /** A cache of the token to be processed next. */
-    protected Token nextToken;
+    Token nextToken;
     /** A code generator, descendant of AbstractGenerate. */
-    protected Generate myGenerate = null;
+    Generate myGenerate = null;
 
     /** Begin processing the first (top level) token.*/
     public abstract void _statementPart_() throws IOException, CompilationException;
