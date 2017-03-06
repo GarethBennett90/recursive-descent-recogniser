@@ -1,4 +1,5 @@
 import java.io.IOException;
+
 /**
  * @author JamesDavies
  * @date 28/02/2017
@@ -26,7 +27,8 @@ public class SyntaxAnalyser extends AbstractSyntaxAnalyser {
         // Begining of the statement list
         acceptTerminal(Token.beginSymbol);
 
-        parseStatementList();
+        // Enter into the statement list
+        handleStatementList();
 
         // Ending of the parsing
         acceptTerminal(Token.endSymbol);
@@ -37,28 +39,56 @@ public class SyntaxAnalyser extends AbstractSyntaxAnalyser {
     /**
      * Start processing the statement list
      */
-    private void parseStatementList() {
+    private void handleStatementList() throws IOException {
 
-        // Loop until we find a semicolon
+        // Check not at the end of the list
+        Token currToken;
+        while ((currToken = lex.getNextToken()).symbol != Token.endSymbol) {
+            System.out.println(Token.getName(currToken.symbol));
+
+            try {
+                acceptTerminal(currToken.symbol);
+            } catch (CompilationException e) {
+            }
+
+            if (currToken.symbol == Token.semicolonSymbol) {
+                // End of the current line
+                System.out.println("End of line");
+            }
+        }
     }
+
+    private void handleIf() {
+
+    }
+
+    private void handleWhile() {
+
+    }
+
+    private void handleVariables() {
+
+    }
+
+    private void handleProcedure() {
+
+    }
+
 
     @Override
     public void acceptTerminal(int symbol) throws IOException, CompilationException {
 
-        String sybl = Token.getName(symbol);
-
-
         switch (symbol) {
-            case Token.eofSymbol:
-                acceptTerminal(lex.getNextToken().symbol);
-                break;
             case Token.callSymbol:
+                handleProcedure();
+                break;
+            case Token.ifSymbol:
+                handleIf();
+                break;
+            case Token.whileSymbol:
+                handleWhile();
                 break;
         }
-    }
-
-    public void expression() {
-
     }
 
 }
