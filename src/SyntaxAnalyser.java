@@ -7,9 +7,10 @@ import java.io.IOException;
 public class SyntaxAnalyser extends AbstractSyntaxAnalyser {
 
     SyntaxAnalyser(String filename) {
+
+        // Initalise the lexical analyser
         try {
             lex = new LexicalAnalyser(filename);
-
         } catch (Exception e) {
             System.err.println("Failed to load lexical analyser.");
         }
