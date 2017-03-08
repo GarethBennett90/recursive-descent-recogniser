@@ -71,25 +71,38 @@ public class SyntaxAnalyser extends AbstractSyntaxAnalyser {
             case Token.becomesSymbol:
                 handleAssignment();
                 break;
+            case Token.whileSymbol:
+                handleWhile();
+                break;
         }
 
         myGenerate.finishNonterminal("<statement>");
     }
 
     private void handleAssignment() throws IOException, CompilationException {
+        // :=
         acceptTerminal(Token.becomesSymbol);
 
-        if (lookahead().symbol != Token.stringSymbol) {
+        // Check if the next token is a string constant
+        if (lex.getNextToken().symbol != Token.stringSymbol) {
             acceptTerminal(Token.stringSymbol);
-            handleExpression();
+            return;
         }
+
+        // If it's not a string constant, then handle the expression
+        handleExpression();
     }
 
     private void handleProcedure() throws IOException, CompilationException {
+        // call
         acceptTerminal(Token.callSymbol);
+        // get
         acceptTerminal(Token.identifier);
+        // (
         acceptTerminal(Token.leftParenthesis);
+        // Arguments inside the 'get'
         handleArgumentList();
+        // )
         acceptTerminal(Token.rightParenthesis);
     }
 
@@ -104,20 +117,17 @@ public class SyntaxAnalyser extends AbstractSyntaxAnalyser {
 
     }
 
-    private Token lookahead() throws IOException {
-        return lex.getNextToken();
-    }
-
     private void handleArgumentList() throws IOException, CompilationException {
         myGenerate.commenceNonterminal("<argument list>");
-
-        acceptTerminal(Token.identifier);
 
         // Check if there is a comma, identifiers are automatically processed
         while (nextToken.symbol == Token.commaSymbol) {
             acceptTerminal(Token.commaSymbol);
             handleArgumentList();
         }
+
+        // Accept the identifier
+        acceptTerminal(Token.identifier);
 
         myGenerate.finishNonterminal("<argument list>");
     }
@@ -155,8 +165,13 @@ public class SyntaxAnalyser extends AbstractSyntaxAnalyser {
         System.out.println("Handle the if statement");
     }
 
-    private void handleWhile() {
-        System.out.println("Handle the while statement");
+    private void handleWhile() throws IOException, CompilationException {
+        acceptTerminal(Token.whileSymbol);
+        handleCondition();
+        acceptTerminal(Token.loopSymbol);
+        handleStatementList();
+        acceptTerminal(Token.endSymbol);
+        acceptTerminal(Token.loopSymbol);
     }
 
     private void handleVariables() {
