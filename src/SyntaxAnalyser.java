@@ -39,56 +39,118 @@ public class SyntaxAnalyser extends AbstractSyntaxAnalyser {
     /**
      * Start processing the statement list
      */
-    private void handleStatementList() throws IOException {
+    private void handleStatementList() throws IOException, CompilationException {
 
         // Check not at the end of the list
-        Token currToken;
-        while ((currToken = lex.getNextToken()).symbol != Token.endSymbol) {
-            System.out.println(Token.getName(currToken.symbol));
+        myGenerate.commenceNonterminal("<statement list>");
 
-            try {
-                acceptTerminal(currToken.symbol);
-            } catch (CompilationException e) {
-            }
+        handleStatement();
 
-            if (currToken.symbol == Token.semicolonSymbol) {
-                // End of the current line
-                System.out.println("End of line");
-            }
+        // If you've reached a semicolon, then you've finished the statement
+        while (nextToken.symbol == Token.semicolonSymbol) {
+            acceptTerminal(Token.semicolonSymbol);
+            handleStatementList();
+        }
+
+        myGenerate.finishNonterminal("<statement list>");
+    }
+
+    /**
+     * Checks the first Set for the terminal
+     */
+    private void handleStatement() throws IOException, CompilationException {
+        myGenerate.commenceNonterminal("<statement>");
+
+        switch (nextToken.symbol) {
+            case Token.callSymbol:
+                handleCall();
+                break;
+            case Token.whileSymbol:
+                handleWhile();
+                break;
+        }
+
+        myGenerate.finishNonterminal("<statement>");
+    }
+
+    private void handleCall() throws IOException, CompilationException {
+        myGenerate.commenceNonterminal("<procedure statement>");
+        // Expect the first 'call'
+        acceptTerminal(Token.callSymbol);
+        // (
+        acceptTerminal(Token.leftParenthesis);
+        // Handle the arguments passed into the call
+        handleArgumentList();
+        // )
+        acceptTerminal(Token.rightParenthesis);
+
+        myGenerate.finishNonterminal("<procedure statement>");
+    }
+
+    private void handleArgumentList() throws IOException, CompilationException {
+        myGenerate.commenceNonterminal("<argument list>");
+
+        // Check if there is a comma, identifiers are automatically processed
+        while (nextToken.symbol == Token.commaSymbol) {
+            acceptTerminal(Token.commaSymbol);
+            handleArgumentList();
+        }
+
+        myGenerate.finishNonterminal("<argument list>");
+    }
+
+    private void handleCondition() throws IOException, CompilationException {
+        myGenerate.commenceNonterminal("<condition>");
+        handleConditionalOperator();
+        myGenerate.finishNonterminal("<condition>");
+    }
+
+    private void handleConditionalOperator() throws IOException, CompilationException {
+        switch (nextToken.symbol) {
+            case Token.lessThanSymbol:
+                acceptTerminal(Token.lessThanSymbol);
+                break;
+            case Token.greaterThanSymbol:
+                acceptTerminal(Token.greaterThanSymbol);
+                break;
+            case Token.lessEqualSymbol:
+                acceptTerminal(Token.lessEqualSymbol);
+                break;
+            case Token.greaterEqualSymbol:
+                acceptTerminal(Token.greaterEqualSymbol);
+                break;
+            case Token.equalSymbol:
+                acceptTerminal(Token.equalSymbol);
+                break;
+            case Token.notEqualSymbol:
+                acceptTerminal(Token.notEqualSymbol);
+                break;
         }
     }
 
     private void handleIf() {
-
+        System.out.println("Handle the if statement");
     }
 
     private void handleWhile() {
-
+        System.out.println("Handle the while statement");
     }
 
     private void handleVariables() {
 
     }
 
-    private void handleProcedure() {
-
-    }
-
-
     @Override
     public void acceptTerminal(int symbol) throws IOException, CompilationException {
 
-        switch (symbol) {
-            case Token.callSymbol:
-                handleProcedure();
-                break;
-            case Token.ifSymbol:
-                handleIf();
-                break;
-            case Token.whileSymbol:
-                handleWhile();
-                break;
+        // Check if the symbol was expected
+        if (symbol == nextToken.symbol) {
+            myGenerate.insertTerminal(nextToken);
+            nextToken = lex.getNextToken();
+            return;
         }
+
+        myGenerate.reportError(nextToken, "Error on line " + nextToken.lineNumber + ": Invalid symbol found.");
     }
 
 }
