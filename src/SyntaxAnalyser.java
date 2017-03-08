@@ -7,7 +7,7 @@ import java.io.IOException;
  */
 public class SyntaxAnalyser extends AbstractSyntaxAnalyser {
 
-    SyntaxAnalyser(String filename) {
+    public SyntaxAnalyser(String filename) {
 
         // Initalise the lexical analyser
         try {
@@ -49,10 +49,13 @@ public class SyntaxAnalyser extends AbstractSyntaxAnalyser {
         // If you've reached a semicolon, then you've finished the statement
         while (nextToken.symbol == Token.semicolonSymbol) {
             acceptTerminal(Token.semicolonSymbol);
-            handleStatementList();
+
+            // Handle the next statement again
+            handleStatement();
         }
 
         myGenerate.finishNonterminal("<statement list>");
+        myGenerate.reportSuccess();
     }
 
     /**
@@ -63,32 +66,52 @@ public class SyntaxAnalyser extends AbstractSyntaxAnalyser {
 
         switch (nextToken.symbol) {
             case Token.callSymbol:
-                handleCall();
+                handleProcedure();
                 break;
-            case Token.whileSymbol:
-                handleWhile();
+            case Token.becomesSymbol:
+                handleAssignment();
                 break;
         }
 
         myGenerate.finishNonterminal("<statement>");
     }
 
-    private void handleCall() throws IOException, CompilationException {
-        myGenerate.commenceNonterminal("<procedure statement>");
-        // Expect the first 'call'
-        acceptTerminal(Token.callSymbol);
-        // (
-        acceptTerminal(Token.leftParenthesis);
-        // Handle the arguments passed into the call
-        handleArgumentList();
-        // )
-        acceptTerminal(Token.rightParenthesis);
+    private void handleAssignment() throws IOException, CompilationException {
+        acceptTerminal(Token.becomesSymbol);
 
-        myGenerate.finishNonterminal("<procedure statement>");
+        if (lookahead().symbol != Token.stringSymbol) {
+            acceptTerminal(Token.stringSymbol);
+            handleExpression();
+        }
+    }
+
+    private void handleProcedure() throws IOException, CompilationException {
+        acceptTerminal(Token.callSymbol);
+        acceptTerminal(Token.identifier);
+        acceptTerminal(Token.leftParenthesis);
+        handleArgumentList();
+        acceptTerminal(Token.rightParenthesis);
+    }
+
+    private void handleExpression() {
+        myGenerate.commenceNonterminal("<expression>");
+
+
+        myGenerate.finishNonterminal("<expression>");
+    }
+
+    private void handleTerm() {
+
+    }
+
+    private Token lookahead() throws IOException {
+        return lex.getNextToken();
     }
 
     private void handleArgumentList() throws IOException, CompilationException {
         myGenerate.commenceNonterminal("<argument list>");
+
+        acceptTerminal(Token.identifier);
 
         // Check if there is a comma, identifiers are automatically processed
         while (nextToken.symbol == Token.commaSymbol) {
@@ -143,14 +166,15 @@ public class SyntaxAnalyser extends AbstractSyntaxAnalyser {
     @Override
     public void acceptTerminal(int symbol) throws IOException, CompilationException {
 
+        Token actual = nextToken;
         // Check if the symbol was expected
-        if (symbol == nextToken.symbol) {
+        if (symbol == actual.symbol) {
             myGenerate.insertTerminal(nextToken);
             nextToken = lex.getNextToken();
             return;
         }
 
-        myGenerate.reportError(nextToken, "Error on line " + nextToken.lineNumber + ": Invalid symbol found.");
+        myGenerate.reportError(nextToken, "Error on line " + nextToken.lineNumber + ": Invalid symbol found, expected '" + Token.getName(symbol) + "' and found '" + Token.getName(actual.symbol) + "'");
     }
 
 }
