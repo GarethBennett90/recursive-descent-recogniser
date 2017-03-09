@@ -1,4 +1,5 @@
 import java.io.IOException;
+
 /**
  * @author JamesDavies
  * @date 28/02/2017
@@ -133,6 +134,16 @@ public class SyntaxAnalyser extends AbstractSyntaxAnalyser {
     }
 
     /**
+     * Return boolean based on whether the next token is part of a factor
+     *
+     * @return boolean
+     */
+    private boolean isFactor(Token token) {
+        return token.symbol == Token.divideSymbol
+                || token.symbol == Token.timesSymbol;
+    }
+
+    /**
      * @throws IOException
      * @throws CompilationException
      */
@@ -151,9 +162,39 @@ public class SyntaxAnalyser extends AbstractSyntaxAnalyser {
     }
 
 
-    private void handleTerm() {
+    private void handleTerm() throws IOException, CompilationException {
         myGenerate.commenceNonterminal("<term>");
+
+        handleFactor();
+
+        while (isFactor(nextToken)) {
+            // If we know that the next token is either plus or minus, we can simply add it
+            acceptTerminal(nextToken.symbol);
+            handleTerm();
+        }
+
         myGenerate.finishNonterminal("<term>");
+    }
+
+    private void handleFactor() throws IOException, CompilationException {
+        myGenerate.commenceNonterminal("<factor>");
+
+        switch (nextToken.symbol) {
+            case Token.identifier:
+                acceptTerminal(Token.identifier);
+                break;
+            case Token.numberConstant:
+                acceptTerminal(Token.numberConstant);
+                break;
+            case Token.leftParenthesis:
+                acceptTerminal(Token.leftParenthesis);
+                handleExpression();
+                acceptTerminal(Token.rightParenthesis);
+            default:
+                myGenerate.reportError(nextToken, "Error on factor, expected IDENTIFIER, NUMBER or (<expression), but found " + Token.getName(nextToken.symbol));
+        }
+
+        myGenerate.finishNonterminal("<factor>");
     }
 
     /**
