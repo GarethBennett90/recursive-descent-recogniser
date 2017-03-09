@@ -1,4 +1,9 @@
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
+import static java.util.Arrays.asList;
 
 /**
  * @author JamesDavies
@@ -80,20 +85,24 @@ public class SyntaxAnalyser extends AbstractSyntaxAnalyser {
     }
 
     private void handleAssignment() throws IOException, CompilationException {
+        myGenerate.commenceNonterminal("<assignment statement>");
         // :=
         acceptTerminal(Token.becomesSymbol);
 
         // Check if the next token is a string constant
         if (lex.getNextToken().symbol != Token.stringSymbol) {
             acceptTerminal(Token.stringSymbol);
+            myGenerate.finishNonterminal("<assignment statement>");
             return;
         }
 
         // If it's not a string constant, then handle the expression
         handleExpression();
+        myGenerate.finishNonterminal("<assignment statement>");
     }
 
     private void handleProcedure() throws IOException, CompilationException {
+        myGenerate.commenceNonterminal("<procedure statement>");
         // call
         acceptTerminal(Token.callSymbol);
         // get
@@ -104,10 +113,28 @@ public class SyntaxAnalyser extends AbstractSyntaxAnalyser {
         handleArgumentList();
         // )
         acceptTerminal(Token.rightParenthesis);
+        myGenerate.finishNonterminal("<procedure statement>");
     }
 
-    private void handleExpression() {
+    private void handleExpression() throws IOException, CompilationException {
         myGenerate.commenceNonterminal("<expression>");
+
+        handleTerm();
+
+        while (lex.getNextToken().symbol == Token.plusSymbol || lex.getNextToken().symbol == Token.minusSymbol) {
+
+            switch (nextToken.symbol) {
+                case Token.plusSymbol:
+                    acceptTerminal(Token.plusSymbol);
+                    break;
+                case Token.divideSymbol:
+                    acceptTerminal(Token.divideSymbol);
+                    break;
+            }
+            handleTerm();
+            handleExpression();
+        }
+
 
 
         myGenerate.finishNonterminal("<expression>");
@@ -139,6 +166,7 @@ public class SyntaxAnalyser extends AbstractSyntaxAnalyser {
     }
 
     private void handleConditionalOperator() throws IOException, CompilationException {
+        myGenerate.commenceNonterminal("<conditional operator>");
         switch (nextToken.symbol) {
             case Token.lessThanSymbol:
                 acceptTerminal(Token.lessThanSymbol);
@@ -159,6 +187,7 @@ public class SyntaxAnalyser extends AbstractSyntaxAnalyser {
                 acceptTerminal(Token.notEqualSymbol);
                 break;
         }
+        myGenerate.finishNonterminal("<conditional operator>");
     }
 
     private void handleIf() {
@@ -166,12 +195,20 @@ public class SyntaxAnalyser extends AbstractSyntaxAnalyser {
     }
 
     private void handleWhile() throws IOException, CompilationException {
+        myGenerate.commenceNonterminal("<while statement>");
+        // while
         acceptTerminal(Token.whileSymbol);
+        // condition for the loop
         handleCondition();
+        // loop
         acceptTerminal(Token.loopSymbol);
+        // The body of the loop
         handleStatementList();
+        // end loop
         acceptTerminal(Token.endSymbol);
         acceptTerminal(Token.loopSymbol);
+
+        myGenerate.finishNonterminal("<while statement>");
     }
 
     private void handleVariables() {
