@@ -37,7 +37,7 @@ public class SyntaxAnalyser extends AbstractSyntaxAnalyser {
         // Ending of the parsing
         acceptTerminal(Token.endSymbol);
         myGenerate.finishNonterminal("<statement part>");
-
+        myGenerate.reportSuccess();
     }
 
     /**
@@ -59,7 +59,6 @@ public class SyntaxAnalyser extends AbstractSyntaxAnalyser {
         }
 
         myGenerate.finishNonterminal("<statement list>");
-        myGenerate.reportSuccess();
     }
 
     /**
@@ -72,7 +71,7 @@ public class SyntaxAnalyser extends AbstractSyntaxAnalyser {
             case Token.callSymbol:
                 handleProcedure();
                 break;
-            case Token.becomesSymbol:
+            case Token.identifier:
                 handleAssignment();
                 break;
             case Token.whileSymbol:
@@ -90,10 +89,12 @@ public class SyntaxAnalyser extends AbstractSyntaxAnalyser {
     private void handleAssignment() throws IOException, CompilationException {
         myGenerate.commenceNonterminal("<assignment statement>");
         // :=
+        acceptTerminal(Token.identifier);
+
         acceptTerminal(Token.becomesSymbol);
 
         // Check if the next token is a string constant
-        if (lex.getNextToken().symbol != Token.stringSymbol) {
+        if (nextToken.symbol == Token.stringSymbol) {
             acceptTerminal(Token.stringSymbol);
             myGenerate.finishNonterminal("<assignment statement>");
             return;
@@ -168,6 +169,7 @@ public class SyntaxAnalyser extends AbstractSyntaxAnalyser {
         handleFactor();
 
         while (isFactor(nextToken)) {
+
             // If we know that the next token is either plus or minus, we can simply add it
             acceptTerminal(nextToken.symbol);
             handleTerm();
