@@ -1,10 +1,4 @@
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-
-import static java.util.Arrays.asList;
-
 /**
  * @author JamesDavies
  * @date 28/02/2017
@@ -23,6 +17,10 @@ public class SyntaxAnalyser extends AbstractSyntaxAnalyser {
 
     }
 
+    /**
+     * @throws IOException
+     * @throws CompilationException
+     */
     @Override
     public void _statementPart_() throws IOException, CompilationException {
 
@@ -84,6 +82,10 @@ public class SyntaxAnalyser extends AbstractSyntaxAnalyser {
         myGenerate.finishNonterminal("<statement>");
     }
 
+    /**
+     * @throws IOException
+     * @throws CompilationException
+     */
     private void handleAssignment() throws IOException, CompilationException {
         myGenerate.commenceNonterminal("<assignment statement>");
         // :=
@@ -101,6 +103,10 @@ public class SyntaxAnalyser extends AbstractSyntaxAnalyser {
         myGenerate.finishNonterminal("<assignment statement>");
     }
 
+    /**
+     * @throws IOException
+     * @throws CompilationException
+     */
     private void handleProcedure() throws IOException, CompilationException {
         myGenerate.commenceNonterminal("<procedure statement>");
         // call
@@ -116,34 +122,44 @@ public class SyntaxAnalyser extends AbstractSyntaxAnalyser {
         myGenerate.finishNonterminal("<procedure statement>");
     }
 
+    /**
+     * Return boolean based on whether the next token is part of an expression
+     *
+     * @return boolean
+     */
+    private boolean isExpression(Token token) {
+        return token.symbol == Token.plusSymbol
+                || token.symbol == Token.minusSymbol;
+    }
+
+    /**
+     * @throws IOException
+     * @throws CompilationException
+     */
     private void handleExpression() throws IOException, CompilationException {
         myGenerate.commenceNonterminal("<expression>");
 
         handleTerm();
 
-        while (lex.getNextToken().symbol == Token.plusSymbol || lex.getNextToken().symbol == Token.minusSymbol) {
-
-            switch (nextToken.symbol) {
-                case Token.plusSymbol:
-                    acceptTerminal(Token.plusSymbol);
-                    break;
-                case Token.divideSymbol:
-                    acceptTerminal(Token.divideSymbol);
-                    break;
-            }
+        while (isExpression(nextToken)) {
+            // If we know that the next token is either plus or minus, we can simply add it
+            acceptTerminal(nextToken.symbol);
             handleTerm();
-            handleExpression();
         }
-
-
 
         myGenerate.finishNonterminal("<expression>");
     }
 
-    private void handleTerm() {
 
+    private void handleTerm() {
+        myGenerate.commenceNonterminal("<term>");
+        myGenerate.finishNonterminal("<term>");
     }
 
+    /**
+     * @throws IOException
+     * @throws CompilationException
+     */
     private void handleArgumentList() throws IOException, CompilationException {
         myGenerate.commenceNonterminal("<argument list>");
 
@@ -159,12 +175,20 @@ public class SyntaxAnalyser extends AbstractSyntaxAnalyser {
         myGenerate.finishNonterminal("<argument list>");
     }
 
+    /**
+     * @throws IOException
+     * @throws CompilationException
+     */
     private void handleCondition() throws IOException, CompilationException {
         myGenerate.commenceNonterminal("<condition>");
         handleConditionalOperator();
         myGenerate.finishNonterminal("<condition>");
     }
 
+    /**
+     * @throws IOException
+     * @throws CompilationException
+     */
     private void handleConditionalOperator() throws IOException, CompilationException {
         myGenerate.commenceNonterminal("<conditional operator>");
         switch (nextToken.symbol) {
@@ -194,6 +218,10 @@ public class SyntaxAnalyser extends AbstractSyntaxAnalyser {
         System.out.println("Handle the if statement");
     }
 
+    /**
+     * @throws IOException
+     * @throws CompilationException
+     */
     private void handleWhile() throws IOException, CompilationException {
         myGenerate.commenceNonterminal("<while statement>");
         // while
@@ -215,6 +243,11 @@ public class SyntaxAnalyser extends AbstractSyntaxAnalyser {
 
     }
 
+    /**
+     * @param symbol
+     * @throws IOException
+     * @throws CompilationException
+     */
     @Override
     public void acceptTerminal(int symbol) throws IOException, CompilationException {
 
