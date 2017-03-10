@@ -90,12 +90,11 @@ public class SyntaxAnalyser extends AbstractSyntaxAnalyser {
         myGenerate.commenceNonterminal("<assignment statement>");
         // :=
         acceptTerminal(Token.identifier);
-
         acceptTerminal(Token.becomesSymbol);
 
         // Check if the next token is a string constant
-        if (nextToken.symbol == Token.stringSymbol) {
-            acceptTerminal(Token.stringSymbol);
+        if (nextToken.symbol == Token.stringConstant) {
+            acceptTerminal(Token.stringConstant);
             myGenerate.finishNonterminal("<assignment statement>");
             return;
         }
@@ -224,7 +223,24 @@ public class SyntaxAnalyser extends AbstractSyntaxAnalyser {
      */
     private void handleCondition() throws IOException, CompilationException {
         myGenerate.commenceNonterminal("<condition>");
+        acceptTerminal(Token.identifier);
+
         handleConditionalOperator();
+
+        switch (nextToken.symbol) {
+            case Token.identifier:
+                acceptTerminal(Token.identifier);
+                break;
+            case Token.numberConstant:
+                acceptTerminal(Token.numberConstant);
+                break;
+            case Token.stringConstant:
+                acceptTerminal(Token.stringConstant);
+                break;
+            default:
+                myGenerate.reportError(nextToken, "Expected IDENTIFIER, NUMBER or STRING on line " + nextToken.lineNumber);
+        }
+
         myGenerate.finishNonterminal("<condition>");
     }
 
@@ -253,6 +269,8 @@ public class SyntaxAnalyser extends AbstractSyntaxAnalyser {
             case Token.notEqualSymbol:
                 acceptTerminal(Token.notEqualSymbol);
                 break;
+            default:
+                myGenerate.reportError(nextToken, "Error on line " + nextToken.lineNumber + ": Invalid symbol found, expected '" + Token.getName(nextToken.symbol) + "' and found '" + Token.getName(nextToken.symbol) + "'");
         }
         myGenerate.finishNonterminal("<conditional operator>");
     }
@@ -280,10 +298,6 @@ public class SyntaxAnalyser extends AbstractSyntaxAnalyser {
         acceptTerminal(Token.loopSymbol);
 
         myGenerate.finishNonterminal("<while statement>");
-    }
-
-    private void handleVariables() {
-
     }
 
     /**
