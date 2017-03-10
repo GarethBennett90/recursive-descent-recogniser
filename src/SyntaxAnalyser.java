@@ -37,7 +37,6 @@ public class SyntaxAnalyser extends AbstractSyntaxAnalyser {
         // Ending of the parsing
         acceptTerminal(Token.endSymbol);
         myGenerate.finishNonterminal("<statement part>");
-        myGenerate.reportSuccess();
     }
 
     /**
@@ -77,6 +76,14 @@ public class SyntaxAnalyser extends AbstractSyntaxAnalyser {
             case Token.whileSymbol:
                 handleWhile();
                 break;
+            case Token.ifSymbol:
+                handleIf();
+                break;
+            case Token.untilSymbol:
+                handleUntil();
+                break;
+            default:
+                // Handle error
         }
 
         myGenerate.finishNonterminal("<statement>");
@@ -275,8 +282,30 @@ public class SyntaxAnalyser extends AbstractSyntaxAnalyser {
         myGenerate.finishNonterminal("<conditional operator>");
     }
 
-    private void handleIf() {
-        System.out.println("Handle the if statement");
+    private void handleIf() throws IOException, CompilationException {
+        myGenerate.commenceNonterminal("<if statement>");
+
+        // if
+        acceptTerminal(Token.ifSymbol);
+        // If condition
+        handleCondition();
+        // then
+        acceptTerminal(Token.thenSymbol);
+        // FIRST()
+        handleStatementList();
+
+        // Check if an else exists, then we want to handle that
+        if (nextToken.symbol == Token.elseSymbol) {
+            // else
+            acceptTerminal(Token.elseSymbol);
+            // Handle the FIRST()
+            handleStatementList();
+        }
+
+        acceptTerminal(Token.endSymbol);
+        acceptTerminal(Token.ifSymbol);
+
+        myGenerate.finishNonterminal("<if statement>");
     }
 
     /**
@@ -298,6 +327,21 @@ public class SyntaxAnalyser extends AbstractSyntaxAnalyser {
         acceptTerminal(Token.loopSymbol);
 
         myGenerate.finishNonterminal("<while statement>");
+    }
+
+    private void handleUntil() throws IOException, CompilationException {
+        myGenerate.commenceNonterminal("<until statement>");
+
+        // do
+        acceptTerminal(Token.doSymbol);
+        // Handle FIRST() set
+        handleStatementList();
+        // until
+        acceptTerminal(Token.untilSymbol);
+        // Handle the condition
+        handleCondition();
+
+        myGenerate.finishNonterminal("<until statement>");
     }
 
     /**
