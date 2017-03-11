@@ -175,10 +175,9 @@ public class SyntaxAnalyser extends AbstractSyntaxAnalyser {
         handleFactor();
 
         while (isFactor(nextToken)) {
-
             // If we know that the next token is either plus or minus, we can simply add it
             acceptTerminal(nextToken.symbol);
-            handleTerm();
+            handleFactor();
         }
 
         myGenerate.finishNonterminal("<term>");
@@ -212,14 +211,15 @@ public class SyntaxAnalyser extends AbstractSyntaxAnalyser {
     private void handleArgumentList() throws IOException, CompilationException {
         myGenerate.commenceNonterminal("<argument list>");
 
+        // Accept the identifier
+        acceptTerminal(Token.identifier);
+
         // Check if there is a comma, identifiers are automatically processed
         while (nextToken.symbol == Token.commaSymbol) {
             acceptTerminal(Token.commaSymbol);
+            acceptTerminal(Token.identifier);
             handleArgumentList();
         }
-
-        // Accept the identifier
-        acceptTerminal(Token.identifier);
 
         myGenerate.finishNonterminal("<argument list>");
     }
@@ -360,7 +360,7 @@ public class SyntaxAnalyser extends AbstractSyntaxAnalyser {
             return;
         }
 
-        myGenerate.reportError(nextToken, "Error on line " + nextToken.lineNumber + ": Invalid symbol found, expected '" + Token.getName(symbol) + "' and found '" + Token.getName(actual.symbol) + "'");
+        myGenerate.reportError(nextToken, "Invalid symbol found, expected '" + Token.getName(symbol) + "' and found '" + Token.getName(actual.symbol) + "'");
     }
 
 }
