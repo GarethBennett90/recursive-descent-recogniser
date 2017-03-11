@@ -11,7 +11,7 @@ public class Generate extends AbstractGenerate {
 
     @Override
     public void reportError(Token token, String explanatoryMessage) throws CompilationException {
-        System.err.println("Error on line " + token.lineNumber + ": " + explanatoryMessage);
+        throw new CompilationException("Error on line " + token.lineNumber + ": " + explanatoryMessage);
     }
 
 }
