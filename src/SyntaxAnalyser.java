@@ -79,7 +79,7 @@ public class SyntaxAnalyser extends AbstractSyntaxAnalyser {
     }
 
     /**
-     * Checks the first Set for the terminal
+     * Checks the first Set for any of the first non-terminals
      */
     private void handleStatement() throws IOException, CompilationException {
         myGenerate.commenceNonterminal("<statement>");
@@ -344,6 +344,11 @@ public class SyntaxAnalyser extends AbstractSyntaxAnalyser {
         myGenerate.finishNonterminal("<conditional operator>");
     }
 
+    /**
+     * Handle the IF statements
+     * @throws IOException
+     * @throws CompilationException
+     */
     private void handleIf() throws IOException, CompilationException {
         myGenerate.commenceNonterminal("<if statement>");
 
@@ -464,6 +469,7 @@ public class SyntaxAnalyser extends AbstractSyntaxAnalyser {
         // Check if the symbol was expected
         if (symbol == actual.symbol) {
             myGenerate.insertTerminal(nextToken);
+            // Move the token to the next one
             nextToken = lex.getNextToken();
             return;
         }
